@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+      args:
+        - HOST=${HOST}
+        - HOST_GID=${HOST_GID}
+        - HOST_UID=${HOST_UID}
+        - HOST_USER=${HOST_USER}
+        - HOST_GROUP=${HOST_GROUP}
+    networks:
+      test_net:
+        ipv4_address: ${HOST_IP}
+    volumes:
+      - ./app:/app
+    environment:
+      HOST: ${HOST}
+    depends_on:
+      - php
+    links:
+      - php
+
+  php:
+    build:
+      context: ./php
+      args:
+        - HOST_GID=${HOST_GID}
+        - HOST_UID=${HOST_UID}
+        - HOST_USER=${HOST_USER}
+        - HOST_GROUP=${HOST_GROUP}
+    volumes:
+      - ./app:/app
+    networks:
+      test_net:
+
+  mysql:
+    build:
+      context: ./mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    networks:
+      test_net:
+        ipv4_address: ${MYSQL_IP}
+
+networks:
+  test_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: ${NETWORK}

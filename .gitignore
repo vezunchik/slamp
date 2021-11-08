@@ -1,0 +1,4 @@
+/app/
+/mysql/data/
+/.env
+.idea
